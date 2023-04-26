@@ -175,11 +175,11 @@ class LocalDocQA:
             template=prompt_template,
             input_variables=["context", "question"]
         )
-        chatglm.history = chat_history
+        self.llm.history = chat_history
         vector_store = FAISS.load_local(vs_path, self.embeddings)
         knowledge_chain = RetrievalQA.from_llm(
-            llm=chatglm,
-            retriever=vector_store.as_retriever(search_kwargs={"k": VECTOR_SEARCH_TOP_K}),
+            llm=self.llm,
+            retriever=vector_store.as_retriever(search_kwargs={"k": self.top_k}),
             prompt=prompt
         )
         knowledge_chain.combine_documents_chain.document_prompt = PromptTemplate(
@@ -189,5 +189,5 @@ class LocalDocQA:
         knowledge_chain.return_source_documents = True
 
         result = knowledge_chain({"query": query})
-        chatglm.history[-1][0] = query
-        return result, chatglm.history
+        self.llm.history[-1][0] = query
+        return result, self.llm.history
