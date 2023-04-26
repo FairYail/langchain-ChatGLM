@@ -194,7 +194,7 @@ class LocalDocQA:
     #     return result, self.llm.history
 
     # 结合知识库进行问题回答
-    def get_knowledge_based_answer(query, vector_store, chat_history=[]):
+    def get_knowledge_based_answer(self, query, vector_store, chat_history=[]):
         global chatglm, embeddings
 
         prompt_template = """
