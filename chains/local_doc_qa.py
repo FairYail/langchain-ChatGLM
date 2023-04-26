@@ -138,21 +138,22 @@ class LocalDocQA:
         related_docs_with_score = vector_store.similarity_search_with_score(query,
                                                                             k=self.top_k)
         related_docs = get_docs_with_score(related_docs_with_score)
-        prompt = generate_prompt(related_docs, query)
+        # prompt = generate_prompt(related_docs, query)
 
-        if streaming:
-            for result, history in self.llm._call(prompt=prompt,
-                                                  history=chat_history):
-                history[-1][0] = query
-                response = {"query": query,
-                            "result": result,
-                            "source_documents": related_docs}
-                yield response, history
-        else:
-            result, history = self.llm._call(prompt=prompt,
-                                             history=chat_history)
-            history[-1][0] = query
-            response = {"query": query,
-                        "result": result,
-                        "source_documents": related_docs}
-            return response, history
+        # if streaming:
+        #     for result, history in self.llm._call(prompt=prompt,
+        #                                           history=chat_history):
+        #         history[-1][0] = query
+        #         response = {"query": query,
+        #                     "result": result,
+        #                     "source_documents": related_docs}
+        #         yield response, history
+        # else:
+        # result, history = self.llm._call(prompt=prompt,
+        #                                    history=chat_history)
+        history = []
+        history[-1][0] = query
+        response = {"query": query,
+                    "result": related_docs,
+                    "source_documents": related_docs}
+        return response, history
