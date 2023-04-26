@@ -157,13 +157,9 @@ class LocalDocQA:
     #                     "source_documents": related_docs}
     #         return response, history
 
+    def get_knowledge_based_answer(self, query, vs_path, chat_history=[]):
+        global chatglm, embeddings
 
-    def get_knowledge_based_answer(self,
-                                   query,
-                                   vs_path,
-                                   chat_history=[],
-                                   streaming=True):
-        self.llm.streaming = streaming
         prompt_template = """
     你的身份是道天录游戏客服。
     必须仅基于以下已知信息，简洁和专业的来回答用户的问题。
@@ -179,11 +175,11 @@ class LocalDocQA:
             template=prompt_template,
             input_variables=["context", "question"]
         )
-        self.llm.history = chat_history
+        chatglm.history = chat_history
         vector_store = FAISS.load_local(vs_path, self.embeddings)
         knowledge_chain = RetrievalQA.from_llm(
-            llm=self.llm,
-            retriever=vector_store.as_retriever(search_kwargs={"k": self.top_k}),
+            llm=chatglm,
+            retriever=vector_store.as_retriever(search_kwargs={"k": VECTOR_SEARCH_TOP_K}),
             prompt=prompt
         )
         knowledge_chain.combine_documents_chain.document_prompt = PromptTemplate(
@@ -193,5 +189,5 @@ class LocalDocQA:
         knowledge_chain.return_source_documents = True
 
         result = knowledge_chain({"query": query})
-        self.llm.history[-1][0] = query
-        return result, self.llm.history
+        chatglm.history[-1][0] = query
+        return result, chatglm.history
