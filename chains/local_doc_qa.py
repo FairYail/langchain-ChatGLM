@@ -128,66 +128,31 @@ class LocalDocQA:
             print("文件均未成功加载，请检查依赖包或替换为其他文件再次上传。")
             return None, loaded_files
 
-    # def get_knowledge_based_answer(self,
-    #                                query,
-    #                                vs_path,
-    #                                chat_history=[],
-    #                                streaming=True):
-    #     self.llm.streaming = streaming
-    #     vector_store = FAISS.load_local(vs_path, self.embeddings)
-    #     related_docs_with_score = vector_store.similarity_search_with_score(query,
-    #                                                                         k=self.top_k)
-    #     related_docs = get_docs_with_score(related_docs_with_score)
-    #     prompt = generate_prompt(related_docs, query)
-    #
-    #     if streaming:
-    #         for result, history in self.llm._call(prompt=prompt,
-    #                                               history=chat_history):
-    #             history[-1][0] = query
-    #             response = {"query": query,
-    #                         "result": result,
-    #                         "source_documents": related_docs}
-    #             yield response, history
-    #     else:
-    #         result, history = self.llm._call(prompt=prompt,
-    #                                          history=chat_history)
-    #         history[-1][0] = query
-    #         response = {"query": query,
-    #                     "result": result,
-    #                     "source_documents": related_docs}
-    #         return response, history
-
-    def get_knowledge_based_answer(self, query, vs_path, chat_history=[]):
-        global chatglm, embeddings
-
-        prompt_template = """
-    你的身份是道天录游戏客服。
-    必须仅基于以下已知信息，简洁和专业的来回答用户的问题。
-    如果无法从中得到答案，请直接说 "根据已知信息无法回答该问题" 或 "没有提供足够的相关信息"  或 "人工湖客服"，不允许在答案中添加编造成分，答案请使用中文或数字或符号。
-    每次回答必须在答案的开头加上: "道友您好，"。
-
-    已知内容:
-    {context}
-
-    问题:
-    {question}"""
-        prompt = PromptTemplate(
-            template=prompt_template,
-            input_variables=["context", "question"]
-        )
-        self.llm.history = chat_history
+    def get_knowledge_based_answer(self,
+                                   query,
+                                   vs_path,
+                                   chat_history=[],
+                                   streaming=True):
+        self.llm.streaming = streaming
         vector_store = FAISS.load_local(vs_path, self.embeddings)
-        knowledge_chain = RetrievalQA.from_llm(
-            llm=self.llm,
-            retriever=vector_store.as_retriever(search_kwargs={"k": self.top_k}),
-            prompt=prompt
-        )
-        knowledge_chain.combine_documents_chain.document_prompt = PromptTemplate(
-            input_variables=["page_content"], template="{page_content}"
-        )
+        related_docs_with_score = vector_store.similarity_search_with_score(query,
+                                                                            k=self.top_k)
+        related_docs = get_docs_with_score(related_docs_with_score)
+        prompt = generate_prompt(related_docs, query)
 
-        knowledge_chain.return_source_documents = True
-
-        result = knowledge_chain({"query": query})
-        self.llm.history[-1][0] = query
-        return result, self.llm.history
+        if streaming:
+            for result, history in self.llm._call(prompt=prompt,
+                                                  history=chat_history):
+                history[-1][0] = query
+                response = {"query": query,
+                            "result": result,
+                            "source_documents": related_docs}
+                yield response, history
+        else:
+            result, history = self.llm._call(prompt=prompt,
+                                             history=chat_history)
+            history[-1][0] = query
+            response = {"query": query,
+                        "result": result,
+                        "source_documents": related_docs}
+            return response, history
