@@ -13,7 +13,7 @@ import os
 import time
 
 if __name__ == '__main__':
-    os.environ["OPENAI_API_KEY"] = "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"
+    os.environ["OPENAI_API_KEY"] = "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"
     # 提示用户输入文件名，支持pdf文件和普通文本文件
     file_path=os.path.abspath("/home/dev/langchain-ChatGLM/zc.txt")
     # file_path = "/Users/marshoo/Desktop/hortor/"
@@ -27,8 +27,8 @@ if __name__ == '__main__':
     chunks = loader.load_and_split(splitter)
 
     # 定义文本的embedding，也就是如何把文本转换为向量。默认使用sentence-transformers这个免费的模型，也可以使用OpenAI提供的收费接口
-    # embeddings = OpenAIEmbeddings()
-    embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-mpnet-base-v2")
+    embeddings = OpenAIEmbeddings()
+    # embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-mpnet-base-v2")
 
     # 实现一个本地的文档语义搜索，在存入一堆chunk之后，能够随时检索和问题最相关的一些chunk。Chroma就是一个比较流行的vector store
     db = Chroma.from_documents(chunks, embeddings)
