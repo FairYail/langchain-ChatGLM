@@ -13,7 +13,7 @@ import os
 import time
 
 if __name__ == '__main__':
-    os.environ["OPENAI_API_KEY"] = "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"
+    os.environ["OPENAI_API_KEY"] = "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"
     # 提示用户输入文件名，支持pdf文件和普通文本文件
     file_path=os.path.abspath("/home/dev/langchain-ChatGLM/zc.txt")
     # file_path = "/Users/marshoo/Desktop/hortor/"
