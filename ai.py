@@ -15,7 +15,7 @@ import time
 if __name__ == '__main__':
     os.environ["OPENAI_API_KEY"] = "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"
     # 提示用户输入文件名，支持pdf文件和普通文本文件
-    file_path=os.path.abspath("/Users/zhuchen/Desktop/zc.txt")
+    file_path=os.path.abspath("/home/dev/langchain-ChatGLM/zc.txt")
     # file_path = "/Users/marshoo/Desktop/hortor/"
 
 
