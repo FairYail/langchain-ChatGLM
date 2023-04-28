@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 
 import pandas as pd
-from text2vec import LargeWord2Vec
+from text2vec.models import FastText
 from text2vec.vectorizers import Vectorizer
 import numpy as np
 from annoy import AnnoyIndex
 
 # 加载 text2vec-large-chinese 模型
-model_path = "/home/dev/text2vec-large-chinese"
-model = LargeWord2Vec.load_fasttext_format(model_path)
+model_path = "/home/dev/text2vec-large-chinese/pytorch_model.bin"
+model = FastText.load_fasttext_format(model_path)
 
 # 加载问答数据
 data = pd.read_csv("/home/dev/langchain-ChatGLM/dtl.csv")
