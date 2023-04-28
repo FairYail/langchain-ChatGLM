@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import pandas as pd
-from text2vec.models import LargeWord2Vec
+from text2vec import LargeWord2Vec
 from text2vec.vectorizers import Vectorizer
 import numpy as np
 from annoy import AnnoyIndex
