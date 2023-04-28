@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 import pandas as pd
 from text2vec.models import FastText
 from text2vec.vectorizers import Vectorizer
