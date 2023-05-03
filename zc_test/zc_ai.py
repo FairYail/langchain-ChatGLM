@@ -343,7 +343,7 @@ corpus_embeddings = embedder.encode(corpus)
 while True:
     query = input("Q：")
     query_embedding = embedder.encode(query)
-    hits = semantic_search(query_embedding, corpus_embeddings, top_k=5)
+    hits = semantic_search(query_embedding, corpus_embeddings, top_k=10)
     print("\n\n======================\n\n")
     print("Query:", query)
     print("\nTop 5 most similar sentences in corpus:")
