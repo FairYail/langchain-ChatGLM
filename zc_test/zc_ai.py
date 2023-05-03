@@ -1,21 +1,12 @@
-import os
-import torch
-from transformers import AutoTokenizer, AutoModel
+import sys
 
-os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
+sys.path.append('..')
+from text2vec import SentenceModel, cos_sim, semantic_search
 
+embedder = SentenceModel("shibing624/text2vec-base-chinese")
 
-# Mean Pooling - Take attention mask into account for correct averaging
-def mean_pooling(model_output, attention_mask):
-    token_embeddings = model_output[0]  # First element of model_output contains all token embeddings
-    input_mask_expanded = attention_mask.unsqueeze(-1).expand(token_embeddings.size()).float()
-    return torch.sum(token_embeddings * input_mask_expanded, 1) / torch.clamp(input_mask_expanded.sum(1), min=1e-9)
-
-
-# Load model from HuggingFace Hub
-tokenizer = AutoTokenizer.from_pretrained('shibing624/text2vec-base-chinese')
-model = AutoModel.from_pretrained('shibing624/text2vec-base-chinese')
-sentences = [
+# Corpus with example sentences
+corpus = [
         '每个人都能设置助战弟子吗',
         '为什么七曜锁妖塔中我的弟子没有技能，属性有变化',
         '如何获取专武',
@@ -345,14 +336,17 @@ sentences = [
         '如何建造长老靖室',
         '宗门大殿不见了',
         '吕洞宾归尘·铁骨怎么提升'
-    ]
-# Tokenize sentences
-encoded_input = tokenizer(sentences, padding=True, truncation=True, return_tensors='pt')
+]
+corpus_embeddings = embedder.encode(corpus)
 
-# Compute token embeddings
-with torch.no_grad():
-    model_output = model(**encoded_input)
-# Perform pooling. In this case, max pooling.
-sentence_embeddings = mean_pooling(model_output, encoded_input['attention_mask'])
-print("Sentence embeddings:")
-print(sentence_embeddings)
+
+while True:
+    query = input("Q：")
+    query_embedding = embedder.encode(query)
+    hits = semantic_search(query_embedding, corpus_embeddings, top_k=5)
+    print("\n\n======================\n\n")
+    print("Query:", query)
+    print("\nTop 5 most similar sentences in corpus:")
+    hits = hits[0]  # Get the hits for the first query
+    for hit in hits:
+        print(corpus[hit['corpus_id']], "(Score: {:.4f})".format(hit['score']))
