@@ -1,6 +1,7 @@
 import csv
 import numpy as np
-from text2vec import Text2Vec
+from langchain.embeddings import HuggingFaceEmbeddings
+# from text2vec import Text2Vec
 import faiss
 
 # 设定向量维度
@@ -20,12 +21,15 @@ with open('/home/dev/langchain-ChatGLM/zc.csv', 'r', encoding='utf-8') as f:
         answers.append(row[1])
 
 # 初始化text2vec模型
-model = Text2Vec('text2vec-large-chinese')
+# model = Text2Vec('text2vec-large-chinese')
+
+# 把文本转换为向量。
+embeddings = HuggingFaceEmbeddings(model_name="GanymedeNil/text2vec-large-chinese")
 
 # 将问题和答案转换为向量
 vectors_list = []
 for text in (questions + answers):
-    vector = model.vectorize(text, size=VECTOR_DIM)
+    vector = embeddings.vectorize(text, size=VECTOR_DIM)
     vectors_list.append(vector)
 vectors = np.array(vectors_list)
 
@@ -36,7 +40,7 @@ index.add(vectors)
 # 匹配相似度最高的答案
 while True:
     query = input("Q：")
-    query_vector = model.vectorize(query, size=VECTOR_DIM)
+    query_vector = embeddings.vectorize(query, size=VECTOR_DIM)
     _, similar_ids = index.search(np.array([query_vector]), k=1)
     answer = answers[similar_ids[0][0]]
 
