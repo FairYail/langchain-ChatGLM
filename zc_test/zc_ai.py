@@ -3,7 +3,7 @@ import sys
 sys.path.append('..')
 from text2vec import SentenceModel, cos_sim, semantic_search
 
-embedder = SentenceModel("shibing624/text2vec-base-chinese")
+embedder = SentenceModel("text2vec-large-chinese")
 
 # Corpus with example sentences
 corpus = [
