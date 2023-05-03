@@ -1,13 +1,21 @@
-import sys
+import os
+import torch
+from transformers import AutoTokenizer, AutoModel
 
-sys.path.append('..')
-from text2vec import SentenceModel
-from text2vec import Word2Vec
+os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 
 
-def compute_emb(model):
-    # Embed a list of sentences
-    sentences = [
+# Mean Pooling - Take attention mask into account for correct averaging
+def mean_pooling(model_output, attention_mask):
+    token_embeddings = model_output[0]  # First element of model_output contains all token embeddings
+    input_mask_expanded = attention_mask.unsqueeze(-1).expand(token_embeddings.size()).float()
+    return torch.sum(token_embeddings * input_mask_expanded, 1) / torch.clamp(input_mask_expanded.sum(1), min=1e-9)
+
+
+# Load model from HuggingFace Hub
+tokenizer = AutoTokenizer.from_pretrained('shibing624/text2vec-base-chinese')
+model = AutoModel.from_pretrained('shibing624/text2vec-base-chinese')
+sentences = [
         '每个人都能设置助战弟子吗',
         '为什么七曜锁妖塔中我的弟子没有技能，属性有变化',
         '如何获取专武',
@@ -338,19 +346,13 @@ def compute_emb(model):
         '宗门大殿不见了',
         '吕洞宾归尘·铁骨怎么提升'
     ]
-    sentence_embeddings = model.encode(sentences)
-    print(type(sentence_embeddings), sentence_embeddings.shape)
+# Tokenize sentences
+encoded_input = tokenizer(sentences, padding=True, truncation=True, return_tensors='pt')
 
-    # The result is a list of sentence embeddings as numpy arrays
-    for sentence, embedding in zip(sentences, sentence_embeddings):
-        print("Sentence:", sentence)
-        print("Embedding shape:", embedding.shape)
-        print("Embedding head:", embedding[:10])
-        print("-------------------------------------")
-    print("***************************************")
-
-
-if __name__ == "__main__":
-    # 中文句向量模型(CoSENT)，中文语义匹配任务推荐，支持fine-tune继续训练
-    t2v_model = SentenceModel("shibing624/text2vec-base-chinese")
-    compute_emb(t2v_model)
+# Compute token embeddings
+with torch.no_grad():
+    model_output = model(**encoded_input)
+# Perform pooling. In this case, max pooling.
+sentence_embeddings = mean_pooling(model_output, encoded_input['attention_mask'])
+print("Sentence embeddings:")
+print(sentence_embeddings)
