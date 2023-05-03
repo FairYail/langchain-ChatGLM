@@ -20,9 +20,6 @@ with open('/home/dev/langchain-ChatGLM/zc.csv', 'r', encoding='utf-8') as f:
         questions.append(row[0])
         answers.append(row[1])
 
-# 初始化text2vec模型
-# model = Text2Vec('text2vec-large-chinese')
-
 # 把文本转换为向量。
 embeddings = HuggingFaceEmbeddings(model_name="GanymedeNil/text2vec-large-chinese")
 
